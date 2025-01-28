@@ -1,17 +1,17 @@
 
 
-export class pantalla01 extends Phaser.Scene
+export class pantalla02 extends Phaser.Scene
 {
 
     constructor()
     {
-        super({key:'pantalla01'});
+        super({key:'pantalla02'});
     }
 
     score=0;
     preload ()
     {
-    this.load.image('sky', 'assets/sky.png');
+    this.load.image('sky2', 'assets/sky2.png');
     this.load.image('ground', 'assets/platform.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
@@ -21,7 +21,8 @@ export class pantalla01 extends Phaser.Scene
         { frameWidth: 32, frameHeight: 48 }
     );
     }
-    
+
+    //poner un enemigo 
 
 create ()
 {
@@ -30,7 +31,7 @@ create ()
  // -dispara/pegar y se elimina la bomba
 
 
-this.add.image(400, 300, 'sky');
+this.add.image(400, 300, 'sky2');
 //this.add.image(400, 300, 'star');
 this.platforms = this.physics.add.staticGroup();
 
@@ -111,13 +112,11 @@ collectStar (player, star)
   }
   if (this.stars.countActive(true) === 0)
   {
-    this.scene.start('pantalla02');
-    /*this.stars.children.iterate(function (child) {
+    this.stars.children.iterate(function (child) {
 
           child.enableBody(true, child.x, 0, true, true);
       });
-      
-      this.crearBomba();*/
+      this.crearBomba();
 
   }
 }
