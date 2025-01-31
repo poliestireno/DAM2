@@ -121,9 +121,13 @@ function shootBullet() {
         game.scene.scenes[0].bulletText.setText(`Balas restantes: ${currentBullets}`);
 
         // Desactivar la bala al salir de los límites del mundo
+        //Hace que el proyectil colisione con los límites del mundo en lugar de atravesarlos.
         bullet.setCollideWorldBounds(true);
+        //Habilita el evento de colisión con los bordes del mundo. Sin esto, el evento 'worldbounds' no se activará.
         bullet.body.onWorldBounds = true;
-
+//Escucha el evento 'worldbounds' y, cuando el proyectil choca con un borde del mundo, lo elimina con killAndHide(bullet).
+//killAndHide(bullet) lo marca como inactivo y lo oculta, ideal si estás usando un Group 
+// para reciclar balas en lugar de destruirlas y crear nuevas.
         bullet.once('worldbounds', () => {
             bullets.killAndHide(bullet);
         });
@@ -138,3 +142,38 @@ function hitEnemy(bullet, enemy) {
     // Mensaje en consola
     console.log('¡Enemigo eliminado!');
 }
+
+
+Para hacer que el enemigo reaparezca con mayor velocidad después de ser eliminado, puedes modificar la función hitEnemy para:
+
+Reactivar al enemigo tras un tiempo usando setTimeout o un evento de Phaser.Timer.
+Aumentar su velocidad cada vez que reaparece.
+Aquí tienes una versión mejorada de tu código:
+
+Código actualizado:
+javascript
+Copiar
+Editar
+function hitEnemy(bullet, enemy) {
+    // Desactivar la bala y el enemigo
+    bullets.killAndHide(bullet);
+    enemy.disableBody(true, true);
+
+    // Mensaje en consola
+    console.log('¡Enemigo eliminado!');
+
+    // Incrementar la velocidad (opcionalmente, podrías almacenarla en `enemy.speed` en su inicialización)
+    let nuevaVelocidad = enemy.body.velocity.x * 1.2; // Aumenta un 20% cada vez
+    if (Math.abs(nuevaVelocidad) < 50) nuevaVelocidad = 50; // Velocidad mínima
+
+    // Reactivar al enemigo después de un tiempo
+    setTimeout(() => {
+        enemy.enableBody(true, Phaser.Math.Between(50, 750), Phaser.Math.Between(50, 550), true, true);
+        enemy.setVelocityX(nuevaVelocidad); // Aplicar nueva velocidad
+    }, 1000); // Espera 1 segundo antes de reaparecer
+}
+Explicación:
+Oculta el enemigo y la bala al colisionar.
+Aumenta su velocidad en un 20% cada vez que reaparece.
+Evita que la velocidad sea demasiado baja estableciendo un mínimo de 50.
+Reaparece después de 1 segundo en una posición aleatoria.
