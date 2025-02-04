@@ -18,6 +18,7 @@ create ()
  //cuando se acaba que vaya a otra escena que ponga gameover y diga los puntos.
  // -dispara/pegar y se elimina la bomba
 
+this.audio_ok1 = this.sound.add('audio_ok1');
 
 this.add.image(400, 300, 'sky');
 //this.add.image(400, 300, 'star');
@@ -93,7 +94,7 @@ collectStar (player, star)
     star.disableBody(true, true);
     this.score += 10;
     this.scoreText.setText('Score: ' + this.score);
-
+    this.audio_ok1.play();
   if (this.score % 60 == 0)
   {
     this.crearBomba();

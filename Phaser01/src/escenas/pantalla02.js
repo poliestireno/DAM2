@@ -10,23 +10,20 @@ export class pantalla02 extends Phaser.Scene
 
     score=0;
 
-    preload ()
-    {
-    this.load.image('sky2', 'assets/sky2.png');
-    this.load.image('ground', 'assets/platform.png');
-    this.load.image('star', 'assets/star.png');
-    this.load.image('bomb', 'assets/bomb.png');
-    
-    this.load.spritesheet('dude', 
-        'assets/dude.png',
-        { frameWidth: 32, frameHeight: 48 }
-    );
-    }
-
+  
   //  poner un enemigo con el propio sprite que ande aleatorio y
   //  que se le pueda disparar.
 
+//meter sonido
+//partida dobles, dos jugadores a la vez
+//que el disparo le venga coger una pistola, a las 10 balas se le va la pistola
+//contador de 3 vidas
+
+
+
+
   vRandomX=100;
+  tengoPistola=false;
 
 createEnemigo()
 {
@@ -47,11 +44,11 @@ createEnemigo()
 
 }
 maxBalas=10;
-balasRestantes=this.maxBalas;
+balasRestantes=0;
 createBalas()
 {
   this.balas = this.physics.add.group({defaultKey:'torpedo',maxSize:this.maxBalas});
-  this.textoBalas = this.add.text(10,10,"Balas restantes "+this.balasRestantes);
+  this.textoBalas = this.add.text(600,10,"Balas restantes "+this.balasRestantes);
 }
 
 
@@ -97,7 +94,7 @@ toqueEnemigo(laBala,elenemigo)
   setTimeout(()=>{
     this.enemigo.enableBody(true,150,400,true,true);
   },2000);
-
+  this.enemigoKO.play();
 }
 create ()
 {
@@ -105,7 +102,11 @@ create ()
  //cuando se acaba que vaya a otra escena que ponga gameover y diga los puntos.
  // -dispara/pegar y se elimina la bomba
 
+ this.audio_ok1 = this.sound.add('audio_ok1');
+ this.enemigoKO = this.sound.add('enemigoKO');
+ this.pistolaS = this.sound.add('pistola');
 
+this.tengoPistola=false;
 this.add.image(400, 300, 'sky2');
 //this.add.image(400, 300, 'star');
 this.platforms = this.physics.add.staticGroup();
@@ -151,6 +152,22 @@ this.bombs = this.physics.add.group();
   this.physics.add.collider(this.bombs, this.platforms);
 
   this.physics.add.collider(this.player, this.bombs, this.hitBomb, null, this);
+
+
+  this.pistola = this.physics.add.image(100, 450, 'pistola');
+  this.physics.add.collider(this.pistola, this.platforms);
+
+  this.physics.add.overlap(this.player, this.pistola, this.cogerPistola, null, this);
+
+}
+cogerPistola()
+{
+  this.tengoPistola=true;
+  this.pistola.setActive(false);
+  this.pistola.setVisible(false);
+  this.balasRestantes=10;
+  this.textoBalas.setText("Balas restantes "+this.balasRestantes);
+  this.pistolaS.play();
 }
 crearBomba() 
 {
@@ -165,7 +182,7 @@ collectStar (player, star)
     star.disableBody(true, true);
     this.score += 10;
     this.scoreText.setText('Score: ' + this.score);
-
+    this.audio_ok1.play();
   if (this.score % 60 == 0)
   {
     this.crearBomba();
@@ -219,11 +236,11 @@ if (this.cursors.up.isDown && this.player.body.touching.down)
     this.player.setVelocityY(-330);
 }
 
-if(Phaser.Input.Keyboard.JustDown(this.keyM) && this.balasRestantes>0)
+if(Phaser.Input.Keyboard.JustDown(this.keyM) && this.tengoPistola)
   {
     this.disparar(300);
   }
-if(Phaser.Input.Keyboard.JustDown(this.keyN) && this.balasRestantes>0)
+if(Phaser.Input.Keyboard.JustDown(this.keyN) && this.tengoPistola)
   {
     this.disparar(-300);
   }
@@ -236,19 +253,30 @@ disparar(vel)
   const balaAux = this.balas.get(this.player.x, this.player.y);
   if (balaAux)
   {
-    balaAux.setActive(true);
-    balaAux.setVisible(true);
-    balaAux.body.velocity.x=vel;
-    balaAux.body.velocity.y=-300;
-    this.balasRestantes--;
-    this.textoBalas.setText("Balas restantes "+this.balasRestantes);
-    balaAux.setCollideWorldBounds(true);
-
-    balaAux.body.onWorldBounds = true;
-    this.physics.world.on('worldbounds', function(body){
-    this.balas.killAndHide(balaAux);
-    },this);
+    if (this.balasRestantes==0)
+    {
+      this.tengoPistola=false;
+      this.pistola.setActive(true);
+      this.pistola.setVisible(true);
+    }
+    else
+    {
+      balaAux.setActive(true);
+      balaAux.setVisible(true);
+      balaAux.body.velocity.x=vel;
+      balaAux.body.velocity.y=-300;
+      this.balasRestantes--;
+      this.textoBalas.setText("Balas restantes "+this.balasRestantes);
+      balaAux.setCollideWorldBounds(true);
+  
+      balaAux.body.onWorldBounds = true;
+      this.physics.world.on('worldbounds', function(body){
+      this.balas.killAndHide(balaAux);
+      },this);
+    }
+    
   }
+
 }
 
 

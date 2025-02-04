@@ -11,11 +11,16 @@ export class menu extends Phaser.Scene
     preload ()
     {
         this.load.image('sky', 'assets/sky.png');
+        this.load.image('sky2', 'assets/sky2.png');
         this.load.image('ground', 'assets/platform.png');
         this.load.image('star', 'assets/star.png');
         this.load.image('bomb', 'assets/bomb.png');
         this.load.image('enemigo', 'assets/joker.png');
         this.load.image('torpedo', 'assets/torpedo.png');
+        this.load.image('pistola', 'assets/pistola.png');
+        this.load.audio('audio_ok1','assets/sonidos/ok1.ogg');
+        this.load.audio('enemigoKO','assets/sonidos/enemigoKO.ogg');
+        this.load.audio('pistola','assets/sonidos/pistola.ogg');
         
         this.load.spritesheet('dude', 
           'assets/dude.png',
