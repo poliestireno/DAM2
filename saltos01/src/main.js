@@ -14,6 +14,15 @@ const config = {
   }
 };
 
+/*
+ Presionar "D" → Elimina una puntuación de la base de datos.
+ Presionar "K" → Incrementa la puntuación de un jugador en 200 puntos.
+ Presionar "R" → Reinicia la puntuación a 0.
+ Presionar "U" para actualizar la puntuación
+ Presionar "Espacio" para introducir una puntuación
+ 
+*/
+
 const game = new Phaser.Game(config);
 
 let score = 0;
@@ -34,6 +43,35 @@ function create() {
 
   // Texto de puntuación
   scoreText = this.add.text(20, 20, `Puntuación: ${score}`, { font: '32px Arial', fill: '#fff' });
+
+
+// Escuchar la tecla "U" para actualizar la puntuación
+this.input.keyboard.on('keydown-U', () => {
+  const playerToUpdate = prompt('Ingrese el nombre del jugador a actualizar:');
+  const newScore = parseInt(prompt('Ingrese la nueva puntuación:'));
+  if (playerToUpdate && !isNaN(newScore)) {
+      updateScore(playerToUpdate, newScore);
+  }
+});
+this.input.keyboard.on('keydown-K', () => {
+  const playerToIncrease = prompt('Ingrese el nombre del jugador a incrementar en 200:');
+  if (playerToIncrease) {
+      increaseScore200(playerToIncrease);
+  }
+});
+this.input.keyboard.on('keydown-D', () => {
+  const playerToDelete = prompt('Ingrese el nombre del jugador a eliminar:');
+  if (playerToDelete) {
+      deleteScore(playerToDelete);
+  }
+});
+
+this.input.keyboard.on('keydown-R', () => {
+  const playerToReset = prompt('Ingrese el nombre del jugador para reiniciar su puntuación:');
+  if (playerToReset) {
+      resetScore(playerToReset);
+  }
+});
 
   // Escuchar la tecla "Espacio"
   this.input.keyboard.on('keydown-SPACE', () => {
@@ -102,4 +140,66 @@ function updateScoreboard(scene) {
       scene.scoreboardText = scene.add.text(20, 100, text, { font: '20px Arial', fill: '#fff' });
   }
 }
+// Función para modificar una puntuación en el backend
+function updateScore(player, newScore) {
+  fetch(`http://localhost:3000/api/scores/${player}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ score: newScore })
+  })
+  .then(response => response.json())
+  .then(() => {
+      loadScores(game.scene.scenes[0]); // Recargar las puntuaciones
+      console.log('Puntuación actualizada correctamente');
+  })
+  .catch(error => {
+      console.error('Error al actualizar la puntuación:', error);
+  });
+}
 
+function increaseScore200(player) {
+  fetch(`http://localhost:3000/api/scores/${player}/increase200`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => response.json())
+  .then(() => {
+      loadScores(game.scene.scenes[0]); // Recargar puntuaciones
+      console.log('Puntuación incrementada en 200');
+  })
+  .catch(error => {
+      console.error('Error al incrementar la puntuación:', error);
+  });
+}
+
+function resetScore(player) {
+  fetch(`http://localhost:3000/api/scores/${player}/reset`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => response.json())
+  .then(() => {
+      loadScores(game.scene.scenes[0]); // Recargar puntuaciones
+      console.log('Puntuación reiniciada a 0');
+  })
+  .catch(error => {
+      console.error('Error al reiniciar la puntuación:', error);
+  });
+}
+
+function deleteScore(player) {
+  fetch(`http://localhost:3000/api/scores/${player}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => response.json())
+  .then(() => {
+      loadScores(game.scene.scenes[0]); // Recargar puntuaciones
+      console.log('Puntuación eliminada correctamente');
+  })
+  .catch(error => {
+      console.error('Error al eliminar la puntuación:', error);
+  });
+}
