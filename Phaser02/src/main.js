@@ -12,7 +12,16 @@ const config = {
       update: update
   }
 };
+/*
 
+ Presionar "M" para actualizar la puntuación
+ Presionar "Espacio" para introducir una puntuación
+ Presionar "K" → Incrementa la puntuación de un jugador en 200 puntos.
+ Presionar "R" → Reinicia la puntuación a 0.
+ Presionar "D" → Elimina una puntuación de la base de datos.
+  HACER metodo get para modificar, no recomendable por por seguridad y standares de REST
+        pero se puede llamar directamente desde un navegador
+*/
 const game = new Phaser.Game(config);
 
 let score = 0;
@@ -45,16 +54,15 @@ function create() {
       }
   });
 
-  this.input.keyboard.on('keydown-M', () => {
-    playerName = prompt('Ingrese el nombre para actualizar:');
-    const scoreValue = parseInt(prompt('Ingrese su puntuación:'));
-    if (playerName && !isNaN(scoreValue)) {
-        score = scoreValue;
-        updateScore(playerName, score); 
+
+// Escuchar la tecla "U" para actualizar la puntuación
+this.input.keyboard.on('keydown-M', () => {
+    const playerToUpdate = prompt('Ingrese el nombre del jugador a actualizar:');
+    const newScore = parseInt(prompt('Ingrese la nueva puntuación:'));
+    if (playerToUpdate && !isNaN(newScore)) {
+        updateScore(playerToUpdate, newScore);
     }
-});
-
-
+  });
   // Cargar puntuaciones al inicio del juego
   loadScores(this);
 }
@@ -82,25 +90,24 @@ function insertScore(player, score) {
       console.error('Error al insertar la puntuación:', error);
   });
 }
-// Función para modificar una puntuación en el backend
-function updateScore(player, score) {
-  fetch('http://localhost:3000/api/scores/${player}', {
-      method: 'PUT',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ score: score })
-  })
-  .then(response => response.json())
-  .then(() => {
-      loadScores(game.scene.scenes[0]); // Recargar las puntuaciones
-      console.log('puntuación actualizada correctamente');
-  })
-  .catch(error => {
-      console.error('Error al actualizar la puntuación:', error);
-  });
-}
-// Función para cargar las puntuaciones desde el backend y mostrarlas en la escena
+function updateScore(player, newScore) {
+    fetch(`http://localhost:3000/api/scores/${player}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ score: newScore })
+    })
+    .then(response => response.json())
+    .then(() => {
+        loadScores(game.scene.scenes[0]); // Recargar las puntuaciones
+        console.log('Puntuación actualizada correctamente');
+    })
+    .catch(error => {
+        console.error('Error al actualizar la puntuación:', error);
+    });
+  }
+  // Función para cargar las puntuaciones desde el backend y mostrarlas en la escena
 function loadScores(scene) {
   fetch('http://localhost:3000/api/scores')
       .then(response => response.json())

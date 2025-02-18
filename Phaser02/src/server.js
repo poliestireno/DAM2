@@ -49,24 +49,27 @@ app.get('/api/scores', async (req, res) => {
         res.status(500).json({ message: 'Error al obtener las puntuaciones', error });
     }
 });
-
+// Ruta para actualizar una puntuación existente
 app.put('/api/scores/:playerName', async (req, res) => {
     try {
-        const {playerName} = req.params;
-        const {score} = req.body;
-        
-        const actualizado = await Score.findOneAndUpdate(
-            {playerName},{score},{new: true}
-        );
-        if (!actualizado)
-        {
-            return res.status(404).json({message: "jugador no encontrado"});
-        }
-        res.status(200).json({message: "puntuación actualizada correctamente", data: actualizado});
+        const { playerName } = req.params;
+        const { score } = req.body;
 
+        const updatedScore = await Score.findOneAndUpdate(
+            { playerName }, 
+            { score }, 
+            { new: true } // Devuelve el nuevo documento actualizado
+        );
+
+        if (!updatedScore) {
+            return res.status(404).json({ message: 'Jugador no encontrado' });
+        }
+
+        res.status(200).json({ message: 'Puntuación actualizada correctamente', data: updatedScore });
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener al actualizar', error });
+        res.status(500).json({ message: 'Error al actualizar la puntuación', error });
     }
 });
+
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Servidor ejecutándose en http://localhost:${PORT}`));
