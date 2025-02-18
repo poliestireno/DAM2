@@ -71,5 +71,64 @@ app.put('/api/scores/:playerName', async (req, res) => {
     }
 });
 
+
+app.patch('/api/scores/:playerName/inc200', async (req, res) => {
+    try {
+        const { playerName } = req.params;
+
+        const updatedScore = await Score.findOneAndUpdate(
+            { playerName }, 
+            { $inc: {score: 200} }, // incrementar en 200 lo actual
+            { new: true } 
+        );
+
+        if (!updatedScore) {
+            return res.status(404).json({ message: 'Jugador no encontrado' });
+        }
+
+        res.status(200).json({ message: 'Puntuación incrementada en 200', data: updatedScore });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al incrementar la puntuación', error });
+    }
+});
+//HACER metodo get para incrementar en 100 un jugador, no recomendable por por seguridad y standares de REST
+//pero se puede llamar directamente desde un navegador
+app.get('/api/scores/:playerName/inc100', async (req, res) => {
+    try {
+        const { playerName } = req.params;
+
+        const updatedScore = await Score.findOneAndUpdate(
+            { playerName }, 
+            { $inc: {score: 100} }, // incrementar en 200 lo actual
+            { new: true } 
+        );
+
+        if (!updatedScore) {
+            return res.status(404).json({ message: 'Jugador no encontrado' });
+        }
+
+        res.status(200).json({ message: 'Puntuación incrementada en 200', data: updatedScore });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al incrementar la puntuación', error });
+    }
+});
+
+
+
+
+app.delete('/api/scores/:playerName', async (req, res) => {
+    try {
+        const { playerName } = req.params;
+        const delScore = await Score.findOneAndDelete(
+            { playerName } );
+        if (!delScore) {
+            return res.status(404).json({ message: 'Jugador no encontrado' });
+        }
+        res.status(200).json({ message: 'Jugador borrado', data: delScore });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al borrar jugador', error });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Servidor ejecutándose en http://localhost:${PORT}`));

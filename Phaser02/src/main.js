@@ -19,7 +19,7 @@ const config = {
  Presionar "K" → Incrementa la puntuación de un jugador en 200 puntos.
  Presionar "R" → Reinicia la puntuación a 0.
  Presionar "D" → Elimina una puntuación de la base de datos.
-  HACER metodo get para modificar, no recomendable por por seguridad y standares de REST
+  HACER metodo get para incrementar en 100 un jugador, no recomendable por por seguridad y standares de REST
         pero se puede llamar directamente desde un navegador
 */
 const game = new Phaser.Game(config);
@@ -55,6 +55,25 @@ function create() {
   });
 
 
+// Escuchar la tecla "K" para incrementar en 200
+this.input.keyboard.on('keydown-K', () => {
+    const playerToInc = prompt('Ingrese el nombre del jugador para incrementar 200:');
+    
+    if (playerToInc) {
+        incrementarScore200(playerToInc);
+    }
+  });
+
+// Escuchar la tecla "D" para incrementar en 200
+this.input.keyboard.on('keydown-D', () => {
+    const playerToDe = prompt('Ingrese el nombre del jugador para borrar:');
+    
+    if (playerToDe) {
+        borrarJugador(playerToDe);
+    }
+  });
+
+
 // Escuchar la tecla "U" para actualizar la puntuación
 this.input.keyboard.on('keydown-M', () => {
     const playerToUpdate = prompt('Ingrese el nombre del jugador a actualizar:');
@@ -63,10 +82,11 @@ this.input.keyboard.on('keydown-M', () => {
         updateScore(playerToUpdate, newScore);
     }
   });
-  // Cargar puntuaciones al inicio del juego
-  loadScores(this);
-}
 
+// Cargar puntuaciones al inicio del juego
+loadScores(this);
+
+}
 // Función update para actualizar la escena (si es necesario)
 function update() {
   // Aquí podrías agregar la lógica de tu juego
@@ -90,6 +110,7 @@ function insertScore(player, score) {
       console.error('Error al insertar la puntuación:', error);
   });
 }
+
 function updateScore(player, newScore) {
     fetch(`http://localhost:3000/api/scores/${player}`, {
         method: 'PUT',
@@ -107,6 +128,42 @@ function updateScore(player, newScore) {
         console.error('Error al actualizar la puntuación:', error);
     });
   }
+  
+
+  function incrementarScore200(player) {
+    fetch(`http://localhost:3000/api/scores/${player}/inc200`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(() => {
+        loadScores(game.scene.scenes[0]); // Recargar las puntuaciones
+        console.log('Puntuación incrementada en 200 correctamente');
+    })
+    .catch(error => {
+        console.error('Error al incrementar en 200 la puntuación:', error);
+    });
+  }
+
+  function borrarJugador(player) {
+    fetch(`http://localhost:3000/api/scores/${player}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(() => {
+        loadScores(game.scene.scenes[0]); // Recargar las puntuaciones
+        console.log('Jugador eliminado');
+    })
+    .catch(error => {
+        console.error('Error al borrar el jugador:', error);
+    });
+  }
+  
   // Función para cargar las puntuaciones desde el backend y mostrarlas en la escena
 function loadScores(scene) {
   fetch('http://localhost:3000/api/scores')
